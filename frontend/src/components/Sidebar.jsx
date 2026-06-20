@@ -2,13 +2,13 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const links = [
-  { to: '/dashboard', label: 'Dashboard', icon: '📊' },
+  { to: '/dashboard', label: 'Inicio', icon: '📊' },
   { to: '/observaciones', label: 'Observaciones', icon: '🔍' },
   { to: '/planes', label: 'Planes de Acción', icon: '📋' },
 ]
 
 export default function Sidebar() {
-  const { usuario = { nombre: 'Demo Usuario', rol: 'auditor' }, logout } = useAuth()
+  const { usuario, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {

@@ -2,14 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 import app.models  # noqa: F401
-from app.routers import auth
+from app.routers import auth, observaciones, planes
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="FollowAudit API",
     description="Backend para el sistema de seguimiento de planes de acción post-auditoría",
-    version="0.3.0"
+    version="0.4.0"
 )
 
 app.add_middleware(
@@ -21,11 +21,13 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(observaciones.router)
+app.include_router(planes.router)
 
 
 @app.get("/")
 def root():
-    return {"message": "FollowAudit API funcionando", "version": "0.3.0"}
+    return {"message": "FollowAudit API funcionando", "version": "0.4.0"}
 
 
 @app.get("/health")

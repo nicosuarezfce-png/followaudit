@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session, joinedload
 from typing import List
 from datetime import date
@@ -10,6 +10,7 @@ from app.models.usuario import RolUsuario
 from app.schemas.plan_accion import PlanAccionCrear, PlanAccionActualizar, PlanAccionRespuesta
 from app.schemas.plazo import PlazoCrear, PlazoActualizar, PlazoRespuesta
 from app.auth import get_usuario_actual, require_rol
+from app import email_service
 
 router = APIRouter(prefix="/planes", tags=["Planes de Acción"])
 
@@ -18,10 +19,12 @@ router = APIRouter(prefix="/planes", tags=["Planes de Acción"])
 def crear_plan(
     obs_id: int,
     datos: PlanAccionCrear,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _=Depends(require_rol(RolUsuario.auditor))
 ):
-    if not db.query(Observacion).filter(Observacion.id == obs_id).first():
+    obs = db.query(Observacion).filter(Observacion.id == obs_id).first()
+    if not obs:
         raise HTTPException(status_code=404, detail="Observación no encontrada")
 
     plan = PlanAccion(
@@ -33,11 +36,22 @@ def crear_plan(
     db.add(plan)
     db.flush()
 
-    # Primer plazo obligatorio
     plazo = Plazo(plan_accion_id=plan.id, fecha_vencimiento=datos.plazo_inicial)
     db.add(plazo)
     db.commit()
     db.refresh(plan)
+
+    # Email al responsable en segundo plano (no bloquea la respuesta)
+    background_tasks.add_task(
+        email_service.email_plan_creado,
+        responsable_email=datos.responsable_email,
+        responsable_nombre=datos.responsable_nombre,
+        observacion_titulo=obs.titulo,
+        plan_descripcion=datos.descripcion,
+        fecha_vencimiento=datos.plazo_inicial,
+        area=obs.area,
+    )
+
     return plan
 
 

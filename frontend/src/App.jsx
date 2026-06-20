@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Observaciones from './pages/Observaciones'
 import Planes from './pages/Planes'
+import ObservacionDetalle from './pages/ObservacionDetalle'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/observaciones" element={<Observaciones />} />
             <Route path="/planes" element={<Planes />} />
+            <Route path="/observaciones/:id" element={<ObservacionDetalle />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

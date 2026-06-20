@@ -4,7 +4,7 @@ import Sidebar from './Sidebar'
 
 export default function Layout() {
   const { usuario } = useAuth()
-  // if (!usuario) return <Navigate to="/login" replace />
+  if (!usuario) return <Navigate to="/login" replace />
 
   return (
     <div className="flex min-h-screen bg-slate-50">
